@@ -1,3 +1,4 @@
 # hide __pycache__ 
 *__pycache__/
 *.db
+migrations/
