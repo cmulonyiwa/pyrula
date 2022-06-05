@@ -1,11 +1,15 @@
+from flask import current_app
 from . import db
 
 
 class Role(db.Model):
+    __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     role_name = db.Column(db.String(30))
     permissions = db.Column(db.Integer)
     default_role = db.Column(db.Boolean, default=False)
+    users = db.relationship('User', backref='role', lazy='dynamic')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if self.permissions is None:
@@ -35,20 +39,41 @@ class Role(db.Model):
             role = Role.query.filter_by(role_name = ro).first()
             if role is None:
                 role = Role(role_name = ro)
-
             default_role = 'User'
             role.reset_permission()
             for perm in roles[ro]:
                 role.add_permission(perm)
             role.default_role = (role.role_name == default_role)
             db.session.add(role)
-
         db.session.commit()
-            
-
-
+      
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.role_name}>'
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(30))
+    email = db.Column(db.String(60))
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.role is None:
+            if current_app.config.get('ADMIN_EMAIL') == self.email :
+                self.role = Role.query.filter_by(role_name='Admin').first()
+            if self.role is None:
+                 self.role = Role.query.filter_by(default_role=True).first()
+
+    def able(self, perm):
+        return  self.role is not  None and self.role.has_permission(perm)
+
+    def is_administrator(self):
+        return self.role is not None and self.role.has_permission(Permission.ADMIN)
+    
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {self.username}>'
 
 
 class Permission:
