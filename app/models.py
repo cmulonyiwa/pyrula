@@ -1,3 +1,4 @@
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask import current_app
 from . import db
 
@@ -14,7 +15,7 @@ class Role(db.Model):
         super().__init__(**kwargs)
         if self.permissions is None:
             self.permissions = 0
-    
+
     def has_permission(self, perm):
         return (self.permissions & perm)  == perm
 
@@ -55,7 +56,20 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30))
     email = db.Column(db.String(60))
+    password_hash = db.Column(db.String(150))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+    @property
+    def password(self):
+        raise AttributeError('you cant read password')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 
 
     def __init__(self, **kwargs):
