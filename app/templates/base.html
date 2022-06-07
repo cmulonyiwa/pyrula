@@ -7,6 +7,25 @@
     <title>Document</title>
 </head>
 <body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{url_for('main.index')}}">home</a></li>
+                <li><a href="{{url_for('auth.login')}}">login</a></li>
+                <li><a href="{{url_for('auth.logout')}}">logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     {%block content%}
     {%endblock%}
 </body>
