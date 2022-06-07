@@ -1,6 +1,7 @@
 from werkzeug.security import check_password_hash, generate_password_hash
+from flask_login import UserMixin
 from flask import current_app
-from . import db
+from . import db, login_manager
 
 
 class Role(db.Model):
@@ -51,7 +52,7 @@ class Role(db.Model):
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.role_name}>'
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30))
@@ -70,8 +71,6 @@ class User(db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if self.role is None:
@@ -89,6 +88,10 @@ class User(db.Model):
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.username}>'
 
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 class Permission:
     FOLLOW = 1 
