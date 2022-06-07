@@ -1,5 +1,5 @@
 from basics import BasicsTestCase
-from app.models import Role, Permission
+from app.models import Role, Permission, User
 
 
 def add_perm(role):
@@ -8,7 +8,7 @@ def add_perm(role):
     role.add_permission(Permission.COMMENT)
    
 class RoleModelTestCase(BasicsTestCase):
-    
+
     def test_add_permission(self):
         role = Role()       
         self.assertEqual(role.permissions, 0)
@@ -33,4 +33,19 @@ class RoleModelTestCase(BasicsTestCase):
         self.assertEqual(role.permissions, 0)
 
 
-        
+class UserModelTestCase(BasicsTestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = User(password='africa')
+
+    def test_no_password_getter(self):
+        with self.assertRaises(AttributeError):
+            self.user.password
+
+    def test_password_setter(self):
+        self.assertTrue(self.user.password_hash is not None)
+
+    def test_hashes_are_not_equal(self):
+        user1 = User(password='africa')
+        self.assertTrue(self.user.password_hash != user1)
+
