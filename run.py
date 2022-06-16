@@ -2,6 +2,8 @@ from flask_migrate import Migrate
 from app import create_app, db
 from app.models import Role, Permission, User
 
+
+
 app = create_app('devconfig')
 
 migrate = Migrate(app,db)
@@ -16,3 +18,6 @@ def test():
     import unittest
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
+
+from commands import data
+app.cli.add_command(data)
