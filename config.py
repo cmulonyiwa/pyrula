@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'strong_key')
+    SECRET_KEY = os.environ.get('FLASK_KEY', 'strong_key')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 
