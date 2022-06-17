@@ -1,4 +1,6 @@
 from werkzeug.security import check_password_hash, generate_password_hash
+import jwt
+from datetime import datetime, timedelta
 from flask_login import UserMixin
 from flask import current_app
 from . import db, login_manager
@@ -47,8 +49,7 @@ class Role(db.Model):
                 role.add_permission(perm)
             role.default_role = (role.role_name == default_role)
             db.session.add(role)
-        db.session.commit()
-      
+        db.session.commit()     
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.role_name}>'
 
@@ -58,6 +59,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(30))
     email = db.Column(db.String(60))
     password_hash = db.Column(db.String(150))
+    confirmed = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
     @property
@@ -84,6 +86,25 @@ class User(db.Model, UserMixin):
 
     def is_administrator(self):
         return self.role is not None and self.role.has_permission(Permission.ADMIN)
+    
+    def gen_token(self):
+        now = datetime.now()
+        calc = timedelta(seconds=1800)
+        get_time = (now + calc).timestamp()
+        return jwt.encode({'exp': get_time, 'id': self.id}, current_app.secret_key, algorithm='HS256')
+        
+    def confirm_token(self, token):
+        try:
+            data = jwt.decode(token, current_app.secret_key,algorithms='HS256')
+        except Exception as t :
+            return False
+
+        if data.get('id') != self.id:
+             return False
+        self.confirmed = True
+        db.session.add(self)
+        return True
+
     
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.username}>'
