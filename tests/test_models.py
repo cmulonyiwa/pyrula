@@ -37,6 +37,7 @@ class UserModelTestCase(BasicsTestCase):
     def setUp(self):
         super().setUp()
         self.user = User(password='africa')
+        self.user1 = User(password='africa')
 
     def test_no_password_getter(self):
         with self.assertRaises(AttributeError):
@@ -46,6 +47,14 @@ class UserModelTestCase(BasicsTestCase):
         self.assertTrue(self.user.password_hash is not None)
 
     def test_hashes_are_not_equal(self):
-        user1 = User(password='africa')
-        self.assertTrue(self.user.password_hash != user1)
+        self.assertTrue(self.user.password_hash != self.user1)
 
+    def test_gen_token(self):
+        self.assertNotEqual(self.user.gen_token(), self.user1.gen_token())
+        self.assertGreaterEqual(len(self.user.gen_token()) , 20)
+        self.assertTrue(type(self.user.gen_token()) == str)
+
+    def test_confirm_token(self):
+        token = self.user.gen_token()
+        bools = self.user.confirm_token(token)
+        self.assertTrue(bools is True)
