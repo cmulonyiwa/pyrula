@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for 
 from flask_login import login_required, login_user, logout_user, current_user
 from . import auth
 from .. import db
@@ -43,10 +43,40 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('you have registered', 'success')
+        print(user.gen_token())
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
+@auth.before_app_request
+def before_any_request():
+    if current_user.is_authenticated and  request.blueprint != 'auth' and request.endpoint != 'static' and not current_user.confirmed:
+        return redirect(url_for('auth.unconfirmed'))
 
 
+@auth.route('/unconfirmed')
+def unconfirmed():
+    return render_template('auth/unconfirmed.html')
+
+
+@auth.route('/confirm/<token>')
+@login_required
+def confirm(token):
+
+    if current_user.confirmed:
+        return redirect(url_for('main.index'))
+
+    if current_user.confirm_token(token):
+        db.session.commit()
+        flash("you have now confirmed")
+        return redirect(url_for('main.index'))
+    else:
+        flash('invalid token or has expired', 'success')
+
+    return redirect(url_for('main.index'))
+
+
+    
+
+    
 
     
