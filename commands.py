@@ -87,8 +87,3 @@ def adduser(username, email, password):
     db.session.add(user)
     db.session.commit()
     click.secho('you have been added to the database'.upper(), fg='blue', bold=True)
-
-
-
-
-
