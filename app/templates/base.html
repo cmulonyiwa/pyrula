@@ -14,8 +14,12 @@
             <ul>
                 <li><a href="{{url_for('main.index')}}">home</a></li>
                 <li><a href="{{url_for('auth.login')}}">login</a></li>
-                <li><a href="{{url_for('auth.logout')}}">logout</a></li>
+                <li><a href="{{url_for('auth.logout')}}">logout</a></li> 
                 <li><a href="{{url_for('auth.register')}}">register</a></li>
+                {%if current_user.is_authenticated%}
+                    <li><a href="{{url_for('auth.user_profile', username=current_user.username)}}">user</a></li> 
+                    <li><a href="{{url_for('auth.user_update_profile', username=current_user.username)}}">update</a></li>  
+                {%endif%}
             </ul>
         </nav>
     </header>

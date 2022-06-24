@@ -1,3 +1,4 @@
+from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 import jwt
 from datetime import datetime, timedelta
@@ -56,11 +57,19 @@ class Role(db.Model):
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30))
     username = db.Column(db.String(30))
     email = db.Column(db.String(60))
     password_hash = db.Column(db.String(150))
     confirmed = db.Column(db.Boolean, default=False)
+    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+
+    def pong(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
     @property
     def password(self):
@@ -119,3 +128,4 @@ class Permission:
     WRITE = 2
     COMMENT = 4 
     ADMIN = 8
+

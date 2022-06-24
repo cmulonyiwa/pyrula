@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Email,EqualTo
 from wtforms.validators import ValidationError
+from flask_login import current_user
 from ..models import User
 
 class LoginForm(FlaskForm):
@@ -22,4 +23,9 @@ class RegisterForm(FlaskForm):
         if user:
             raise ValidationError("Email already registered.")
 
+class UpdateUserProfileForm(FlaskForm):
+    name = StringField('name')
+    username = StringField('username')
+    email = StringField('email', validators=[Email()])
+    submit = SubmitField('update')
         
