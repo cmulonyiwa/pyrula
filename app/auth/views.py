@@ -40,7 +40,9 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('you have registered', 'success')
-        print(user.gen_token())
+        jwts = user.gen_token()
+        if form.token:
+            return redirect(url_for('auth.token', token=jwts))
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
@@ -85,7 +87,7 @@ def user_profile(username):
 @login_required
 def user_update_profile(username):
     user = User.query.filter_by(username=username).first_or_404()
-    form = UpdateUserProfileForm()
+    form = UpdateUserProfileForm(user=user)
     if request.method == 'POST':
         user.name = form.name.data
         user.username = form.username.data
@@ -103,4 +105,6 @@ def user_update_profile(username):
 
 
 
-    
+@auth.route('/<token>')
+def token(token):
+    return render_template('auth/token.html', token=token)

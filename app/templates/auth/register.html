@@ -39,6 +39,15 @@
             {% endfor %}
             </ul>
         {% endif %}
+
+        {{ form.token.label }} {{ form.token() }} 
+        {% if form.token.errors %}
+            <ul class="errors">
+            {% for error in form.token.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
        
         {{ form.submit() }}
     </form>
